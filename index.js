@@ -56,7 +56,7 @@ app.post('/auth/login', async (req, res) => {
     }
 });
 
-// --------------------- CRUD PRODUCTOS ------------------------
+// crud productos
 app.get('/productos', verificarToken, async (req, res) => {
     try {
         const result = await pool.query("SELECT * FROM productos");
@@ -109,11 +109,6 @@ app.delete('/productos/:id', verificarToken, async (req, res) => {
     }
 });
 
-// ============================================
-// PANEL ADMIN - ESTADISTICAS
-// ============================================
-
-// Total usuarios
 app.get('/admin/total-usuarios', async (req, res) => {
   try {
     const result = await pool.query(`SELECT COUNT(*) AS total FROM usuarios`);
@@ -135,7 +130,7 @@ app.get('/admin/total-productos', async (req, res) => {
   }
 });
 
-// Total pedidos (boletas)
+// Total pedidos
 app.get('/admin/total-pedidos', async (req, res) => {
   try {
     const result = await pool.query(`SELECT COUNT(*) AS total FROM boletas`);
@@ -146,7 +141,7 @@ app.get('/admin/total-pedidos', async (req, res) => {
   }
 });
 
-// Ventas del mes (SUMA)
+// Ventas mes
 app.get('/admin/ventas-mes', async (req, res) => {
   try {
     const result = await pool.query(`
@@ -163,11 +158,7 @@ app.get('/admin/ventas-mes', async (req, res) => {
   }
 });
 
-// ------------------- CREAR BOLETA (PEDIDO) -------------------
-// =========================
-//   CREAR BOLETA (PEDIDO)
-// =========================
-
+// crear boleta
 app.post("/boletas", async (req, res) => {
   try {
     const { usuario_id, items } = req.body;
@@ -176,15 +167,13 @@ app.post("/boletas", async (req, res) => {
       return res.status(400).json({ mensaje: "Datos incompletos" });
     }
 
-    // Calcular total correctamente
     let total = 0;
 
     items.forEach(item => {
-      item.subtotal = item.precio * item.cantidad;  // <-- CALCULO REAL
+      item.subtotal = item.precio * item.cantidad; 
       total += item.subtotal;
     });
 
-    // Insertar boleta
     const boleta = await pool.query(
       "INSERT INTO boletas (usuario_id, total) VALUES ($1, $2) RETURNING id",
       [usuario_id, total]
@@ -192,7 +181,6 @@ app.post("/boletas", async (req, res) => {
 
     const boleta_id = boleta.rows[0].id;
 
-    // Insertar detalles
     for (const item of items) {
       await pool.query(
         `INSERT INTO detalle_boleta (boleta_id, producto_id, cantidad, subtotal)
@@ -216,7 +204,7 @@ app.post("/boletas", async (req, res) => {
 
 
 
-// ------------------- OBTENER PEDIDOS PARA ADMIN -------------------
+// pedidos admin
 app.get("/admin/pedidos", async (req, res) => {
   try {
     const result = await pool.query(`
@@ -234,7 +222,7 @@ app.get("/admin/pedidos", async (req, res) => {
   }
 });
 
-// ------------------- ESTADÍSTICAS DEL PANEL ADMIN -------------------
+// estadistica adminn
 app.get("/admin/stats", async (req, res) => {
   try {
     const totalUsuarios = await pool.query(`SELECT COUNT(*) FROM usuarios`);
@@ -263,7 +251,7 @@ app.get("/admin/stats", async (req, res) => {
   }
 });
 
-// --------------------- INICIO SERVIDOR ------------------------
+// servidor
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, "0.0.0.0", () => {
