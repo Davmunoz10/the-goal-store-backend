@@ -1,4 +1,6 @@
 const express = require('express');
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./swagger");
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
@@ -250,6 +252,10 @@ app.get("/admin/stats", async (req, res) => {
     res.status(500).json({ mensaje: "Error obteniendo estadísticas" });
   }
 });
+
+// swagger docs
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 
 // servidor
 const PORT = process.env.PORT || 3000;
